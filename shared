@@ -1,0 +1,44 @@
+#pragma once
+
+#include <memory>
+
+template <typename T>
+class shared
+{
+public:
+    shared(const shared &ptr)
+        : m_ptr(ptr.m_ptr)
+    {}
+    shared(const std::shared_ptr<T> &ptr)
+        : m_ptr(ptr)
+    {}
+
+    inline const T *operator->() const
+    {
+        return m_ptr.get();
+    }
+    inline T *operator->()
+    {
+        if (m_ptr.use_count() > 1)
+            m_ptr = std::make_shared<T>(*m_ptr);
+        return m_ptr.get();
+    }
+
+    inline const T &operator*() const
+    {
+        return *m_ptr;
+    }
+    inline T &operator*()
+    {
+        if (m_ptr.use_count() > 1)
+            m_ptr = std::make_shared<T>(*m_ptr);
+        return *m_ptr;
+    }
+
+    inline long useCount() const
+    {
+        return m_ptr.use_count();
+    }
+private:
+    std::shared_ptr<T> m_ptr;
+};
